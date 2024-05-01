@@ -57,23 +57,18 @@ const run = async (config: R2Config) => {
     const files: string[] = getFileList(config.sourceDir);
 
     for (const file of files) {
-        console.log(file);
         const fileStream = fs.readFileSync(file);
-        console.log(config.sourceDir);
-        console.log(config.destinationDir);
-        //const fileName = file.replace(/^.*[\\\/]/, "");
         const fileName = file.replace(config.sourceDir, "");
         const fileKey = path.join(config.destinationDir !== "" ? config.destinationDir : config.sourceDir, fileName);
 
         if (fileKey.includes('.gitkeep'))
             continue;
         
-        console.log(fileKey);
         const mimeType = mime.getType(file);
 
         const uploadParams: PutObjectCommandInput = {
             Bucket: config.bucket,
-            Key: fileKey,
+            Key: fileKey.replace(/\\/g, '/'),
             Body: fileStream,
             ContentLength: fs.statSync(file).size,
             ContentType: mimeType ?? 'application/octet-stream'
